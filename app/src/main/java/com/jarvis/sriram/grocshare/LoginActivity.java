@@ -187,9 +187,11 @@ public class LoginActivity extends AppCompatActivity implements OnConnectionFail
     public void onConnected(Bundle arg0) {
         is_signInBtn_clicked = false;
         // Get user's information and set it into the layout
-        getProfileInfo();
-        // Update the UI after signin
-        changeUI(true);
+        //getProfileInfo();
+        Intent i= new Intent(this,FirstScreen.class);
+        startActivity(i);
+//         Update the UI after signin
+        //changeUI(true);
 
     }
 
