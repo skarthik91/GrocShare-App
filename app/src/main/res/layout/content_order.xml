@@ -9,24 +9,28 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.jarvis.sriram.grocshare.FirstScreen"
-    tools:showIn="@layout/activity_first_screen2">
+    tools:context="com.example.sagar.myapplication.OrderActivity"
+    tools:showIn="@layout/activity_order"
+    android:orientation="vertical">
+
+
+
+    <ListView
+        android:id = "@+id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/confirm_button"
+        android:layout_weight = "1.0" />
 
 
     <Button
-        android:id="@+id/sign_out_button"
-        android:layout_width="match_parent"
+        android:id = "@+id/confirm_button"
+        android:text = "@string/confirm"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/sign_out"
+        android:onClick="sendDataToCloud"/>
 
-        android:layout_gravity="center_vertical" />
 
-    <!--<Button
-        android:id="@+id/disconnect_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/sign_out_button"
-        android:text="@string/disconnect"
-        android:layout_gravity="center_vertical" />-->
 
 </RelativeLayout>

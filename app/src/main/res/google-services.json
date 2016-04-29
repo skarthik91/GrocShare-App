@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_id": "grocshare-0408",
+    "project_number": "870130606700",
+    "name": "Grocshare"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:870130606700:android:25fbb216985e5477",
+        "client_id": "android:com.jarvis.sriram.grocshare",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.jarvis.sriram.grocshare",
+          "certificate_hash": []
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "870130606700-onag7i225ov4kngmbjtrldc8mk8kqu36.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jarvis.sriram.grocshare",
+            "certificate_hash": "54584138BF6920AF80E3EB7E957451FEB08CA340"
+          }
+        },
+        {
+          "client_id": "870130606700-8vdtqi0qc7nr5u71o973bcda47fbdp5h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 2
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}

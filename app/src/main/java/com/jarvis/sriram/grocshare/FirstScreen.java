@@ -95,7 +95,6 @@ public class FirstScreen extends AppCompatActivity implements GoogleApiClient.Co
             /*case R.id.disconnect_button:
                 Toast.makeText(this, "Revoke Access from G+", Toast.LENGTH_LONG).show();
                 gPlusRevokeAccess();
-
                 break;*/
         }
     }

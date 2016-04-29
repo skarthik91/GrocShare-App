@@ -1,395 +1,454 @@
 package com.jarvis.sriram.grocshare;
 
-import android.app.ProgressDialog;
+
 import android.content.Intent;
-import android.content.IntentSender.SendIntentException;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.plus.Plus;
-import com.google.android.gms.plus.model.people.Person;
 
-import java.io.InputStream;
+import java.io.BufferedReader;
 
-public class LoginActivity extends AppCompatActivity implements OnConnectionFailedListener, View.OnClickListener, ConnectionCallbacks {
-    GoogleApiClient google_api_client;
-    GoogleApiAvailability google_api_availability;
-    SignInButton signIn_btn;
-    private static final int SIGN_IN_CODE = 0;
-    private static final int PROFILE_PIC_SIZE = 120;
-    private ConnectionResult connection_result;
-    private boolean is_intent_inprogress;
-    private boolean is_signInBtn_clicked;
-    private int request_code;
-    ProgressDialog progress_dialog;
+//import com.jarvis.sriram.grocshare.R;
+
+/**
+ * Demonstrates retrieving an ID token for the current Google user.
+ */
+public class LoginActivity extends AppCompatActivity implements
+        GoogleApiClient.OnConnectionFailedListener,
+        View.OnClickListener {
+
+    private static final String TAG = "LoginActivity";
+    private static final int RC_GET_TOKEN = 9002;
+
+    private GoogleApiClient mGoogleApiClient;
+    private TextView mIdTokenTextView;
+    private TextView content;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        buidNewGoogleApiClient();
         setContentView(R.layout.activity_login);
-        //Customize sign-in button.a red button may be displayed when Google+ scopes are requested
-        custimizeSignBtn();
-        setBtnClickListeners();
-        progress_dialog = new ProgressDialog(this);
-        progress_dialog.setMessage("Signing in....");
 
-    }
+        // Views
+        mIdTokenTextView = (TextView) findViewById(R.id.detail);
+        content = (TextView) findViewById(R.id.detail2);
 
-    /*
-    create and  initialize GoogleApiClient object to use Google Plus Api.
-    While initializing the GoogleApiClient object, request the Plus.SCOPE_PLUS_LOGIN scope.
-    */
-
-    private void buidNewGoogleApiClient(){
-
-        google_api_client =  new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Plus.API,Plus.PlusOptions.builder().build())
-                .addScope(Plus.SCOPE_PLUS_LOGIN)
-                .build();
-    }
-
-    /*
-      Customize sign-in button. The sign-in button can be displayed in
-      multiple sizes and color schemes. It can also be contextually
-      rendered based on the requested scopes. For example. a red button may
-      be displayed when Google+ scopes are requested, but a white button
-      may be displayed when only basic profile is requested. Try adding the
-      Plus.SCOPE_PLUS_LOGIN scope to see the  difference.
-    */
-
-    private void custimizeSignBtn(){
-
-        signIn_btn = (SignInButton) findViewById(R.id.sign_in_button);
-        signIn_btn.setSize(SignInButton.SIZE_STANDARD);
-        signIn_btn.setScopes(new Scope[]{Plus.SCOPE_PLUS_LOGIN});
-
-    }
-
-    /*
-      Set on click Listeners on the sign-in sign-out and disconnect buttons
-     */
-
-    private void setBtnClickListeners(){
-        // Button listeners
-        signIn_btn.setOnClickListener(this);
+        // Button click listeners
+        findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
         findViewById(R.id.disconnect_button).setOnClickListener(this);
+
+        // For sample only: make sure there is a valid server client ID.
+        validateServerClientID();
+
+        // [START configure_signin]
+        // Request only the user's ID token, which can be used to identify the
+        // user securely to your backend. This will contain the user's basic
+        // profile (name, profile picture URL, etc) so you should not need to
+        // make an additional call to personalize your application.
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.server_client_id))
+                .requestEmail()
+                .build();
+        // [END configure_signin]
+
+        // Build GoogleAPIClient with the Google Sign-In API and the above options.
+        // ATTENTION: This "addApi(AppIndex.API)"was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .addApi(AppIndex.API).build();
     }
 
-    protected void onStart() {
-        super.onStart();
-        google_api_client.connect();
+    private void getIdToken() {
+        // Show an account picker to let the user choose a Google account from the device.
+        // If the GoogleSignInOptions only asks for IDToken and/or profile and/or email then no
+        // consent screen will be shown here.
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_GET_TOKEN);
     }
 
-    protected void onStop() {
-        super.onStop();
-        if (google_api_client.isConnected()) {
-            google_api_client.disconnect();
-        }
+    private void signOut() {
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        Log.d(TAG, "signOut:onResult:" + status);
+                        updateUI(false);
+                    }
+                });
     }
 
-    protected void onResume(){
-        super.onResume();
-        if (google_api_client.isConnected()) {
-            google_api_client.connect();
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        /*if (id == R.id.action_settings) {
-                return true;
-        }*/
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult result) {
-        if (!result.hasResolution()) {
-            google_api_availability.getErrorDialog(this, result.getErrorCode(),request_code).show();
-            return;
-        }
-
-        if (!is_intent_inprogress) {
-
-            connection_result = result;
-
-            if (is_signInBtn_clicked) {
-
-                resolveSignInError();
-            }
-        }
-
-    }
-
-    /*
-      Will receive the activity result and check which request we are responding to
-
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int responseCode,
-                                    Intent intent) {
-        // Check which request we're responding to
-        if (requestCode == SIGN_IN_CODE) {
-            request_code = requestCode;
-            if (responseCode != RESULT_OK) {
-                is_signInBtn_clicked = false;
-                progress_dialog.dismiss();
-
-            }
-
-            is_intent_inprogress = false;
-
-            if (!google_api_client.isConnecting()) {
-                google_api_client.connect();
-            }
-        }
+    private void revokeAccess() {
+        Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        Log.d(TAG, "revokeAccess:onResult:" + status);
+                        updateUI(false);
+                    }
+                });
     }
 
     @Override
-    public void onConnected(Bundle arg0) {
-        is_signInBtn_clicked = false;
-        // Get user's information and set it into the layout
-        //getProfileInfo();
-        Intent i= new Intent(this,FirstScreen.class);
-        startActivity(i);
-//         Update the UI after signin
-        //changeUI(true);
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-    }
+        BufferedReader reader = null;
+        String text = null;
 
-    @Override
-    public void onConnectionSuspended(int arg0) {
-        google_api_client.connect();
-        changeUI(false);
-    }
+        super.onActivityResult(requestCode, resultCode, data);
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.sign_in_button:
-                Toast.makeText(this, "start sign process", Toast.LENGTH_SHORT).show();
-                gPlusSignIn();
-                break;
-            case R.id.sign_out_button:
-                Toast.makeText(this, "Sign Out from G+", Toast.LENGTH_LONG).show();
-                gPlusSignOut();
+        if (requestCode == RC_GET_TOKEN) {
+            // [START get_id_token]
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            Log.d(TAG, "onActivityResult:GET_TOKEN:success:" + result.getStatus().isSuccess());
 
-                break;
-            case R.id.disconnect_button:
-                Toast.makeText(this, "Revoke Access from G+", Toast.LENGTH_LONG).show();
-                gPlusRevokeAccess();
+            if (result.isSuccess()) {
+                GoogleSignInAccount acct = result.getSignInAccount();
+                String idToken = acct.getIdToken();
 
-                break;
-        }
-    }
+                // Show signed-in UI.
+                Log.d(TAG, "idToken:" + idToken);
+                //mIdTokenTextView.setText(getString(R.string.id_token_fmt, idToken));
+                //updateUI(true);
 
-    /*
-      Sign-in into the Google + account
-     */
+                Log.i(TAG, "Sending Token");
 
-    private void gPlusSignIn() {
-        if (!google_api_client.isConnecting()) {
-            Log.d("user connected","connected");
-            is_signInBtn_clicked = true;
-            progress_dialog.show();
-            resolveSignInError();
+                // TODO(user): send token to server and validate server-side
 
-        }
-    }
+                /*try
+                {
 
-    /*
-      Method to resolve any signin errors
-     */
+                    // Defined URL  where to send data
+                    URL url = new URL("http://httpbin.org/post");
 
-    private void resolveSignInError() {
-        if (connection_result.hasResolution()) {
-            try {
-                is_intent_inprogress = true;
-                connection_result.startResolutionForResult(this, SIGN_IN_CODE);
-                Log.d("resolve error", "sign in error resolved");
-            } catch (SendIntentException e) {
-                is_intent_inprogress = false;
-                google_api_client.connect();
-            }
-        }
-    }
+                    // Send POST data request
 
-    /*
-      Sign-out from Google+ account
-     */
+                    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                    conn.setDoOutput(true);
+                    conn.setRequestMethod("POST");
 
-    private void gPlusSignOut() {
-        if (google_api_client.isConnected()) {
-            Plus.AccountApi.clearDefaultAccount(google_api_client);
-            google_api_client.disconnect();
-            google_api_client.connect();
-            changeUI(false);
-        }
-    }
+                    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+                    wr.write(idToken);
+                    wr.flush();
 
-    /*
-     Revoking access from Google+ account
-     */
+                    Log.i(TAG, "Response Code:" + Integer.toString(conn.getResponseCode()));
+                    Log.i(TAG, "Response Message:"+ conn.getResponseMessage());
+                    // Get the server response
 
-    private void gPlusRevokeAccess() {
-        if (google_api_client.isConnected()) {
-            Plus.AccountApi.clearDefaultAccount(google_api_client);
-            Plus.AccountApi.revokeAccessAndDisconnect(google_api_client)
-                    .setResultCallback(new ResultCallback<Status>() {
-                        @Override
-                        public void onResult(Status arg0) {
-                            Log.d("MainActivity", "User access revoked!");
-                            buidNewGoogleApiClient();
-                            google_api_client.connect();
-                            changeUI(false);
-                        }
+                    reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder sb = new StringBuilder();
+                    String line = null;
 
-                    });
-        }
-    }
 
-    /*
-     get user's information name, email, profile pic,Date of birth,tag line and about me
-     */
 
-    private void getProfileInfo() {
+                    // Read Server Response
+                    while((line = reader.readLine()) != null)
+                    {
+                        // Append server response in string
+                        sb.append(line + "\n");
+                    }
 
-        try {
 
-            if (Plus.PeopleApi.getCurrentPerson(google_api_client) != null) {
-                Person currentPerson = Plus.PeopleApi.getCurrentPerson(google_api_client);
-                setPersonalInfo(currentPerson);
+
+                    text = sb.toString();
+                    Log.i(TAG, "Signed in as: " + text);
+                }
+                catch(Exception ex)
+                {
+                Log.i(TAG,"Exception in Sending");
+                }
+                finally
+                {
+                    try
+                    {
+
+                        reader.close();
+                    }
+
+                    catch(Exception ex) {}
+                }
+
+                // Show response on activity
+                content.setText( text  );
+                Log.i(TAG, "Sent Brooo");
+            }*/
+
+                /*HttpClient httpClient = new DefaultHttpClient();
+HttpPost httpPost = new HttpPost("https://yourbackend.example.com/tokensignin");
+
+try {
+    List nameValuePairs = new ArrayList(1);
+    nameValuePairs.add(new BasicNameValuePair("idToken", idToken));
+    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+    HttpResponse response = httpClient.execute(httpPost);
+    int statusCode = response.getStatusLine().getStatusCode();
+    final String responseBody = EntityUtils.toString(response.getEntity());
+    Log.i(TAG, "Signed in as: " + responseBody);
+} catch (ClientProtocolException e) {
+    Log.e(TAG, "Error sending ID token to backend.", e);
+} catch (IOException e) {
+    Log.e(TAG, "Error sending ID token to backend.", e);
+}}
+*/
+
+            //register(idToken);
+
+
+               // new PostClass(this,idToken).execute();
+
+                AsyncHttpPost asyncHttpPost = new AsyncHttpPost(idToken);
+                asyncHttpPost.setListener(new AsyncHttpPost.Listener() {
+                    @Override
+                    public void onResult(String result) {
+                        // do something, using return value from network
+                    }
+                });
+                asyncHttpPost.execute("http://grocshare-0408.appspot.com/auth");
+
+                Intent i= new Intent(this,GrocShare.class);
+                startActivity(i);
 
             } else {
-                Toast.makeText(getApplicationContext(),
-                        "No Personal info mention", Toast.LENGTH_LONG).show();
-
+                // Show signed-out UI.
+                updateUI(false);
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            // [END get_id_token]
         }
 
     }
 
-    /*
-     set the User information into the views defined in the layout
-     */
 
-    private void setPersonalInfo(Person currentPerson){
 
-        String personName = currentPerson.getDisplayName();
-        String personPhotoUrl = currentPerson.getImage().getUrl();
-        String email = Plus.AccountApi.getAccountName(google_api_client);
-        TextView   user_name = (TextView) findViewById(R.id.userName);
-        user_name.setText("Name: "+personName);
-        TextView gemail_id = (TextView)findViewById(R.id.emailId);
-        gemail_id.setText("Email Id: " +email);
-        TextView dob = (TextView)findViewById(R.id.dob);
-        dob.setText("DOB: "+currentPerson.getBirthday());
-        TextView tag_line = (TextView)findViewById(R.id.tag_line);
-        tag_line.setText("Tag Line: " +currentPerson.getTagline());
-        TextView about_me = (TextView)findViewById(R.id.about_me);
-        about_me.setText("About Me: "+currentPerson.getAboutMe());
-        setProfilePic(personPhotoUrl);
-        progress_dialog.dismiss();
-        Toast.makeText(this, "Person information is shown!", Toast.LENGTH_LONG).show();
+
+
+
+    /*private void register(final String parameter) {
+        class RegisterUser extends AsyncTask<String, Void, String> {
+            ProgressDialog loading;
+            RegisterUserClass ruc = new RegisterUserClass();
+
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                loading = ProgressDialog.show(LoginActivity.this, "Please Wait",null, true, true);
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                loading.dismiss();
+                Toast.makeText(getApplicationContext(),s,Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            protected String doInBackground(String... params) {
+
+
+                String result = ruc.sendPostRequest("http://httpbin.org/post",parameter);
+                Log.i(TAG, "Result is :"+result);
+
+                return  result;
+            }
+        }
+
+        RegisterUser ru = new RegisterUser();
+        ru.execute(parameter);
+    }*/
+/*
+    private class PostClass extends AsyncTask<String, Void, Void> {
+
+        private final Context context;
+        String idToken="";
+        public PostClass(Context c,String token){
+            this.context = c;
+            idToken=token;
+        }
+
+        protected void onPreExecute(){
+            //progress= new ProgressDialog(this.context);
+           // progress.setMessage("Loading");
+            //progress.show();
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            try {
+
+                //final TextView outputView = (TextView) findViewById(R.id.showOutput);
+                URL url = new URL("http://grocshare-0408.appspot.com/auth");
+
+                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                String urlParameters = idToken;
+                connection.setRequestMethod("POST");
+                //connection.setRequestProperty("USER-AGENT", "Mozilla/5.0");
+                //connection.setRequestProperty("ACCEPT-LANGUAGE", "en-US,en;0.5");
+               // connection.setHeader('Accept-Encoding', 'gzip');
+                connection.setDoOutput(true);
+                DataOutputStream dStream = new DataOutputStream(connection.getOutputStream());
+                dStream.writeBytes(urlParameters);
+                dStream.flush();
+                dStream.close();
+                int responseCode = connection.getResponseCode();
+
+                final StringBuilder output = new StringBuilder("Request URL " + url);
+                output.append(System.getProperty("line.separator") + "Request Parameters " + urlParameters);
+                output.append(System.getProperty("line.separator")  + "Response Code " + responseCode);
+                output.append(System.getProperty("line.separator")  + "Type " + "POST");
+                BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                InputStream in = connection.getInputStream();
+                String encoding = connection.getContentEncoding();
+                System.out.println("Encoding : "+encoding);
+                encoding = encoding == null ? "UTF-8" : encoding;
+                //String body = IOUtils.toString(in, encoding);
+                //System.out.println(body);
+                String line = "";
+                StringBuilder responseOutput = new StringBuilder();
+
+                //System.out.println("output===============" + );
+                while((line = br.readLine()) != null ) {
+                    responseOutput.append(line);
+                }
+               // br.close();
+                in.close();
+                int len = connection.getContentLength();
+                Log.d(TAG, "Content Length:  "+ Integer.toString(len));
+                System.out.println("Response:   "+ responseOutput.toString());
+               // output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator") + responseOutput.toString()+"k");
+                //Log.i(TAG, "Output before : " + output);
+                LoginActivity.this.runOnUiThread(new Runnable() {
+
+                                                     @Override
+                                                     public void run() {
+                                                         //outputView.setText(output);
+                                                         //progress.dismiss();
+                                                         //Log.i(TAG, "Output: " + output);
+                                                     }
+                                                 }
+
+
+                );
+
+                //Log.i(TAG, "Output after : " + output);
+
+            } catch (MalformedURLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }*/
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
+        // be available.
+        Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
 
-    /*
-     By default the profile pic url gives 50x50 px image.
-     If you need a bigger image we have to change the query parameter value from 50 to the size you want
-    */
-
-    private void setProfilePic(String profile_pic){
-        profile_pic = profile_pic.substring(0,
-                profile_pic.length() - 2)
-                + PROFILE_PIC_SIZE;
-        ImageView    user_picture = (ImageView)findViewById(R.id.profile_pic);
-        new LoadProfilePic(user_picture).execute(profile_pic);
-    }
-
-    /*
-     Show and hide of the Views according to the user login status
-     */
-
-    private void changeUI(boolean signedIn) {
+    private void updateUI(boolean signedIn) {
         if (signedIn) {
+            ((TextView) findViewById(R.id.status)).setText(R.string.signed_in);
+
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
         } else {
+            ((TextView) findViewById(R.id.status)).setText(R.string.signed_out);
+            mIdTokenTextView.setText(getString(R.string.id_token_fmt, "null"));
 
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
         }
     }
 
-   /*
-    Perform background operation asynchronously, to load user profile picture with new dimensions from the modified url
-    */
+    /**
+     * Validates that there is a reasonable server client ID in strings.xml, this is only needed
+     * to make sure users of this sample follow the README.
+     */
+    private void validateServerClientID() {
+        String serverClientId = getString(R.string.server_client_id);
+        String suffix = ".apps.googleusercontent.com";
+        if (!serverClientId.trim().endsWith(suffix)) {
+            String message = "Invalid server client ID in strings.xml, must end with " + suffix;
 
-    private class LoadProfilePic extends AsyncTask<String, Void, Bitmap> {
-        ImageView bitmap_img;
-
-        public LoadProfilePic(ImageView bitmap_img) {
-            this.bitmap_img = bitmap_img;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            String url = urls[0];
-            Bitmap new_icon = null;
-            try {
-                InputStream in_stream = new java.net.URL(url).openStream();
-                new_icon = BitmapFactory.decodeStream(in_stream);
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
-            }
-            return new_icon;
-        }
-
-        protected void onPostExecute(Bitmap result_img) {
-
-            bitmap_img.setImageBitmap(result_img);
+            Log.w(TAG, message);
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
     }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.sign_in_button:
+                getIdToken();
+                break;
+            case R.id.sign_out_button:
+                signOut();
+                break;
+            case R.id.disconnect_button:
+                revokeAccess();
+                break;
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        mGoogleApiClient.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Login Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.jarvis.sriram.grocshare/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(mGoogleApiClient, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Login Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("http://httpbin.org/post")
+        );
+        AppIndex.AppIndexApi.end(mGoogleApiClient, viewAction);
+        mGoogleApiClient.disconnect();
+    }
 }
