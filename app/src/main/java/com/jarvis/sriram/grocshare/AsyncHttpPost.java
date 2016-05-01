@@ -5,10 +5,9 @@ import android.os.AsyncTask;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedReader;
@@ -16,8 +15,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by KarthikSwaminathan on 4/26/16.
@@ -46,21 +43,16 @@ public class AsyncHttpPost extends AsyncTask<String, String, String> {
     protected String doInBackground(String... params) {
         byte[] result = null;
         String str = "";
-        HttpClient client = new DefaultHttpClient();
-        HttpPost post = new HttpPost(params[0]);// in this case, params[0] is URL
+        HttpClient httpClient = new DefaultHttpClient(); //Deprecated
+        //HttpPost post = new HttpPost(params[0]);// in this case, params[0] is URL
         try {
             // set up post data
-            List nameValuePairs = new ArrayList(1);
-            nameValuePairs.add(new BasicNameValuePair("idToken", mData));
-            post.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
-            post.setHeader("Content-Type", "text/plain");
-            post.setHeader("Accept-Encoding", "gzip");
-            post.setHeader("Content-Type","utf-8");
+            HttpPost request = new HttpPost(params[0]);
+            StringEntity parameter =new StringEntity(mData);
+            request.addHeader("content-type", "application/json");
+            request.setEntity(parameter);
+            HttpResponse response = httpClient.execute(request);
 
-
-
-            //post.setEntity(new UrlEncodedFormEntity(mData, "UTF-8"));
-            HttpResponse response = client.execute(post);
 
             //System.out.println("Encoding "+ response.getEntity().getContentEncoding());
             String responseBody = EntityUtils.toString(response.getEntity());

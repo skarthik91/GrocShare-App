@@ -1,8 +1,10 @@
 package com.jarvis.sriram.grocshare;
 
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -126,7 +128,7 @@ public class LoginActivity extends AppCompatActivity implements
                 // Show signed-in UI.
                 Log.d(TAG, "idToken:" + idToken);
                 //mIdTokenTextView.setText(getString(R.string.id_token_fmt, idToken));
-                //updateUI(true);
+                updateUI(true);
 
                 Log.i(TAG, "Sending Token");
 
@@ -209,19 +211,24 @@ try {
 }}
 */
 
-            //register(idToken);
+            register(idToken);
 
 
                // new PostClass(this,idToken).execute();
 
-                AsyncHttpPost asyncHttpPost = new AsyncHttpPost(idToken);
-                asyncHttpPost.setListener(new AsyncHttpPost.Listener() {
+                /*AsyncHttpPost asyncHttpPost = new AsyncHttpPost(idToken);
+                asyncHttpPost.setListener(new AsyncHttpPost.Listener()
+
+                 {
                     @Override
                     public void onResult(String result) {
                         // do something, using return value from network
                     }
                 });
-                asyncHttpPost.execute("http://grocshare-0408.appspot.com/auth");
+                //asyncHttpPost.execute("http://grocshare-0408.appspot.com/auth");
+                //asyncHttpPost.execute("http://requestb.in/1bsumeu1");
+*/
+
 
                 Intent i= new Intent(this,GrocShare.class);
                 startActivity(i);
@@ -240,7 +247,7 @@ try {
 
 
 
-    /*private void register(final String parameter) {
+    private void register(final String parameter) {
         class RegisterUser extends AsyncTask<String, Void, String> {
             ProgressDialog loading;
             RegisterUserClass ruc = new RegisterUserClass();
@@ -263,7 +270,7 @@ try {
             protected String doInBackground(String... params) {
 
 
-                String result = ruc.sendPostRequest("http://httpbin.org/post",parameter);
+                String result = ruc.sendPostRequest("http://grocshare-0408.appspot.com/auth",parameter);
                 Log.i(TAG, "Result is :"+result);
 
                 return  result;
@@ -272,7 +279,7 @@ try {
 
         RegisterUser ru = new RegisterUser();
         ru.execute(parameter);
-    }*/
+    }
 /*
     private class PostClass extends AsyncTask<String, Void, Void> {
 
