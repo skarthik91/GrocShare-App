@@ -9,21 +9,23 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.example.sagar.myapplication.GrocShare"
-    tools:showIn="@layout/activity_groc_share">
+    tools:context="com.jarvis.sriram.grocshare.NavigationActivity"
+    tools:showIn="@layout/app_bar_navigation">
+
 
     <TextView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/textView"
-    android:layout_below="@+id/numberpicker"
-    android:hint="Your List"    />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/textView"
+        android:layout_below="@+id/numberpicker"
+        android:hint="Your List"    />
 
     <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/spinner"
-        android:layout_alignParentStart="true"
+
+
         android:entries="@array/groclist"/>
 
     <NumberPicker
