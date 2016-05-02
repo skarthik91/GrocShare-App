@@ -8,25 +8,28 @@
             android:title="Order History" />
 
         <item
-            android:id="@+id/nav_squareCash"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="SquareCash" />
-        <item
-            android:id="@+id/nav_splitwise"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Splitwise" />
+            android:id="@+id/nav_signOut"
+            android:icon="@drawable/ic_menu_share"
+            android:title="Sign Out" />
+
+
+
+
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="Pay Up">
         <menu>
+
             <item
-                android:id="@+id/nav_signOut"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Sign Out" />
+                android:id="@+id/nav_squareCash"
+                android:icon="@drawable/ic_menu_slideshow"
+                android:title="SquareCash" />
             <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:id="@+id/nav_splitwise"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="Splitwise" />
+
+
         </menu>
     </item>
 
