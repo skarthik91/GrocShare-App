@@ -30,10 +30,6 @@
         <activity
             android:name=".GrocShare"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity
-            android:name=".OrderActivity"
-            android:label="Order"
             android:theme="@style/AppTheme.NoActionBar" />
         <!--
              ATTENTION: This was auto-generated to add Google Play services to your project for
@@ -44,8 +40,16 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".NavigationActivity"
-            android:label="@string/title_activity_navigation"
+            android:name=".Order_activity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".card_activity"
+            android:label="@string/title_activity_card_activity"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".HistoryActivity"
+            android:label="@string/title_activity_history"
             android:theme="@style/AppTheme"></activity>
     </application>
 

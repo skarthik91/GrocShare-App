@@ -8,9 +8,10 @@
     android:gravity="bottom">
 
     <TextView
+        android:id = "@+id/nav_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="GrocShare"
+
         android:textColor="@android:color/white"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 

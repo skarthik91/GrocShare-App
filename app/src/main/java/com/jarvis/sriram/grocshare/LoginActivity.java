@@ -40,6 +40,9 @@ public class LoginActivity extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient;
     private TextView mIdTokenTextView;
     private TextView content;
+    String userID="";
+    String emailID="";
+    String personName="";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -121,9 +124,17 @@ public class LoginActivity extends AppCompatActivity implements
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             Log.d(TAG, "onActivityResult:GET_TOKEN:success:" + result.getStatus().isSuccess());
 
+
             if (result.isSuccess()) {
                 GoogleSignInAccount acct = result.getSignInAccount();
                 String idToken = acct.getIdToken();
+
+                 personName = acct.getDisplayName();
+                 System.out.println("PErson name is "+ personName);
+                 emailID = acct.getEmail();
+                 userID = acct.getId();
+                Uri personPhoto = acct.getPhotoUrl();
+
 
                 // Show signed-in UI.
                 Log.d(TAG, "idToken:" + idToken);
@@ -231,7 +242,13 @@ try {
 
 
                 Intent i= new Intent(this,GrocShare.class);
+
+                i.putExtra("userID", userID);
+                i.putExtra("emailID", emailID);
+                i.putExtra("Name",personName);
+                i.putExtra("Photo",personPhoto);
                 startActivity(i);
+
 
             } else {
                 // Show signed-out UI.
