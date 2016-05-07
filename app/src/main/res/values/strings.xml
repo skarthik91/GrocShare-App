@@ -50,6 +50,7 @@
     <string name="add">ADD ITEM</string>
     <string name="submit">SUBMIT</string>
     <string-array name="groclist">
+        <item>Bagel</item>
         <item>Bread</item>
         <item>Chappati</item>
         <item>Curd</item>
@@ -57,6 +58,7 @@
         <item>Mint Chutney</item>
         <item>Noodles</item>
         <item>Paneer</item>
+        <item>Pizza</item>
         <item>Rice</item>
         <item>Schezwan Chutney</item>
         <item>Vinegar</item>
