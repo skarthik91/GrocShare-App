@@ -4,12 +4,12 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_orderHistory"
-            android:icon="@drawable/ic_menu_camera"
+            android:icon="@drawable/ic_menu_gallery"
             android:title="Order History" />
 
         <item
             android:id="@+id/nav_signOut"
-            android:icon="@drawable/ic_menu_share"
+            android:icon="@drawable/common_google_signin_btn_icon_dark_normal"
             android:title="Sign Out" />
 
 
@@ -22,11 +22,11 @@
 
             <item
                 android:id="@+id/nav_squareCash"
-                android:icon="@drawable/ic_menu_slideshow"
+                android:icon="@drawable/squarecash"
                 android:title="SquareCash" />
             <item
                 android:id="@+id/nav_splitwise"
-                android:icon="@drawable/ic_menu_manage"
+                android:icon="@drawable/splitwise"
                 android:title="Splitwise" />
 
 

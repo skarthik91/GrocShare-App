@@ -1,5 +1,6 @@
 package com.jarvis.sriram.grocshare;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,16 +10,18 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -38,7 +41,8 @@ public class Order_activity extends AppCompatActivity
     static HashMap<String, Double> orderList = new HashMap<String, Double>();
     static HashMap<String, Double> menuList = new HashMap<String, Double>();
     static HashMap<String, OrderItems> ObjectList = new HashMap<String, OrderItems>();
-
+    ArrayList<String> orderitems = new ArrayList<String>();
+    //String[] orderitems2 = null;
     public static double total = 0;
 
     String userID = "";
@@ -84,7 +88,6 @@ public class Order_activity extends AppCompatActivity
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-        ArrayList<String> orderitems = new ArrayList<String>();
 
         Intent intent = getIntent();
         orderList = (HashMap<String, Double>) intent.getSerializableExtra("map");
@@ -105,22 +108,61 @@ public class Order_activity extends AppCompatActivity
 
             StringBuilder bldr = new StringBuilder();
             double val = orderList.get(key);
-            total += val;
-            bldr.append(key).append("   ").append(val);
+            double unitprice = menuList.get(key);
+            int quant = (int)(val/unitprice);
+            //total += val;
+            bldr.append(key).append(" ").append("*").append(" ").append(quant).append(" ").append("=").append(" ").append(val);
             orderitems.add(bldr.toString());
         }
-
+        total = findtotal();
         SB.append("Total  ").append(total);
         orderitems.add(SB.toString());
 
-        String[] orderitems2 = new String[orderitems.size()];
-        orderitems2 = orderitems.toArray(orderitems2);
-        ListAdapter adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, orderitems2);
-        ListView listView = (ListView) findViewById(R.id.list);
+        // orderitems2 = new String[orderitems.size()];
+        //orderitems2 = orderitems.toArray(orderitems2);
+
+        final ArrayAdapter adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, orderitems);
+        final ListView listView = (ListView) findViewById(R.id.list);
         listView.setAdapter(adapter);
 
+        //Edited code 6th May
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                AlertDialog.Builder adb=new AlertDialog.Builder(Order_activity.this);
+                final int positionToRemove = position;
+                final String item = String.valueOf(parent.getItemAtPosition(positionToRemove));
+                final String[] itemarr = item.split(" ");
+                adb.setTitle("Delete?");
+                adb.setMessage("Are you sure you want to delete " + itemarr[0]);
+                adb.setNegativeButton("Cancel", null);
+                adb.setPositiveButton("Ok", new AlertDialog.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        orderitems.remove(positionToRemove);
+                        orderList.remove(itemarr[0]);
+                        total = findtotal();
+                        Log.i("Total", "Total is    " + total);
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Total").append(" ").append(total);
+                        orderitems.set(orderitems.size() -1 ,sb.toString());
+                        adapter.notifyDataSetChanged();
+
+                    }});
+                adb.show();
+            }
+        });
+
+
+    }
+
+    private double findtotal() {
+        double temp = 0 ;
+        for(String key : orderList.keySet()){
+            temp += orderList.get(key);
+        }
+        return temp;
     }
 
     @Override
@@ -178,7 +220,6 @@ public class Order_activity extends AppCompatActivity
             Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.Splitwise.SplitwiseMobile");
             startActivity(launchIntent);
 
-
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -196,8 +237,10 @@ public class Order_activity extends AppCompatActivity
             Log.i("Quantity", String.valueOf(itemquantity));
             OrderItems obj = new OrderItems(itemname, itemquantity, itemcost);
             ObjectList.put(itemname, obj);
+
         }
 
+        Toast.makeText(getApplicationContext(),"Order Placed Successfully",Toast.LENGTH_LONG).show();
 
         JSONObject json = new JSONObject();
 
@@ -215,7 +258,7 @@ public class Order_activity extends AppCompatActivity
 
         }
 
-        json.put("userid", userID);
+        json.put("userID", userID);
         json.put("items", jsonarr);
         json.put("total", total);
 
@@ -234,6 +277,13 @@ public class Order_activity extends AppCompatActivity
         //asyncHttpPost.execute("http://requestb.in/1leji8q1");
 
         Log.d("Order", json.toString());
+
+        Intent back = new Intent(this,GrocShare.class);
+        back.putExtra("flush",1);
+        back.putExtra("userID",userID);
+        back.putExtra("name",personName);
+        back.putExtra("emailID",emailID);
+        startActivity(back);
     }
 
     @Override

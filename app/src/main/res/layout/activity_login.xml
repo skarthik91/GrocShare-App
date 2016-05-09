@@ -4,7 +4,7 @@
     android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@android:color/white"
     android:orientation="vertical"
     android:weightSum="4"
     tools:context=".LoginActivity">
@@ -17,13 +17,13 @@
         android:orientation="vertical">
 
         <ImageView
-            android:id="@+id/google_icon"
+            android:id="@+id/icon"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="@dimen/g_top_margin"
             android:contentDescription="@string/desc_google_icon"
-            android:src="@drawable/common_google_signin_btn_icon_light" />
+            android:src="@drawable/notification_icon" />
 
         <TextView
             android:id="@+id/title_text"
@@ -32,7 +32,7 @@
             android:layout_marginBottom="10dp"
             android:text="GrocShare"
             android:gravity="center"
-            android:textColor="@android:color/white"
+            android:textColor="@android:color/black"
             android:textSize="36sp" />
 
         <TextView
@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/signed_out"
-            android:textColor="@android:color/white"
+            android:textColor="@android:color/black"
             android:textSize="14sp" />
 
         <TextView
@@ -52,7 +52,7 @@
             android:maxLines="5"
             android:padding="10dp"
             android:scrollbars="vertical"
-            android:textColor="@android:color/white"
+            android:textColor="@android:color/black"
             android:textSize="14sp" />
 
         <TextView
@@ -64,7 +64,7 @@
             android:maxLines="5"
             android:padding="10dp"
             android:scrollbars="vertical"
-            android:textColor="@android:color/white"
+            android:textColor="@android:color/black"
             android:textSize="14sp" />
 
     </LinearLayout>
@@ -74,7 +74,7 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/colorPrimary">
+        android:background="@android:color/white">
 
         <com.google.android.gms.common.SignInButton
             android:id="@+id/sign_in_button"

@@ -227,7 +227,11 @@ public class GrocShare extends AppCompatActivity
         setSupportActionBar(toolbar);
 
 
+
         userID= getIntent().getExtras().getString("userID");
+        //Registering GCM
+        GcmRegistrationAsyncTask task = new GcmRegistrationAsyncTask(this);
+       task.execute(userID);
         personName= getIntent().getExtras().getString("Name");
         emailID=getIntent().getExtras().getString("emailID");
 
@@ -276,6 +280,8 @@ public class GrocShare extends AppCompatActivity
         Menulist.put("Paneer",4.99);
         Menulist.put("Mint Chutney",5.99);
         Menulist.put("Rice",8.99);
+        Menulist.put("Bagel",1.89);
+        Menulist.put("Pizza",5.99);
 
 
 
@@ -406,6 +412,18 @@ public class GrocShare extends AppCompatActivity
         return itemcost;
     }
 
+    public void onResume() {
+        super.onResume();
+        Intent rxint = getIntent();
+        userID= getIntent().getExtras().getString("userID");
+        personName= getIntent().getExtras().getString("Name");
+        emailID=getIntent().getExtras().getString("emailID");
+        int intvalue = rxint.getIntExtra("flush", 0);
+        //flushstatus = bundle.getString("flush");
+
+            OrderList.clear();
 
 
+
+    }
 }

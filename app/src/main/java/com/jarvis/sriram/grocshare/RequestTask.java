@@ -9,14 +9,21 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 
-class RequestTask extends AsyncTask<String, Void, JSONObject> {
+class RequestTask extends AsyncTask<String, String, String> {
 
-    JSONObject jsono;
+    public JSONObject jsono;
+    public JSONObject json;
+    public String data="";
+
+    private onDownload asyncTaskListener;
+
+    public RequestTask(onDownload asyncTaskListener){
+        this.asyncTaskListener = asyncTaskListener;
+    }
 
     @Override
     protected void onPreExecute() {
@@ -25,7 +32,7 @@ class RequestTask extends AsyncTask<String, Void, JSONObject> {
     }
 
     @Override
-    protected JSONObject doInBackground(String... urls) {
+    protected String doInBackground(String... urls) {
         try {
 
             //------------------>>
@@ -38,26 +45,30 @@ class RequestTask extends AsyncTask<String, Void, JSONObject> {
 
             if (status == 200) {
                 HttpEntity entity = response.getEntity();
-                String data = EntityUtils.toString(entity);
+                 data = EntityUtils.toString(entity);
 
                 Log.i("TAG","JSON Data           :"+data);
 
-                 jsono = new JSONObject(data);
 
-                return jsono;
+
+
+
+                return data;
             }
 
 
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (JSONException e) {
-
-            e.printStackTrace();
         }
-        return jsono;
+        return data;
     }
 
-    protected void onPostExecute(Boolean result) {
 
+
+    public void onPostExecute(String data) {
+        asyncTaskListener.onDownload(data);
     }
+
+
 }
+
